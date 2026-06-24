@@ -11,6 +11,10 @@ import (
 type closeFunc func() error
 
 func initializeLogger(logFile string) (*slog.Logger, closeFunc, error) {
+	debugHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+
 	if logFile != "" {
 		file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 		if err != nil {
@@ -31,12 +35,30 @@ func initializeLogger(logFile string) (*slog.Logger, closeFunc, error) {
 			return nil
 		}
 
-		return slog.New(slog.NewTextHandler(multiWriter,nil)), close, nil
+		infoHandler := slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		})
+
+		logger := slog.New(slog.NewMultiHandler(
+			debugHandler,
+			infoHandler,
+			))
+
+		return logger, close, nil
 	}
+
+	infoHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	logger := slog.New(slog.NewMultiHandler(
+		debugHandler,
+		infoHandler,
+		))
 
 	close := func() error {
 		return nil
 	}
 
-	return slog.New(slog.NewTextHandler(os.Stderr, nil)), close ,nil
+	return logger, close ,nil
 }
