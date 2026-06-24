@@ -4,13 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 )
 
 type closeFunc func() error
 
-func initializeLogger(logFile string) (*log.Logger, closeFunc, error) {
+func initializeLogger(logFile string) (*slog.Logger, closeFunc, error) {
 	if logFile != "" {
 		file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 		if err != nil {
@@ -31,12 +31,12 @@ func initializeLogger(logFile string) (*log.Logger, closeFunc, error) {
 			return nil
 		}
 
-		return log.New(multiWriter, "", log.LstdFlags), close, nil
+		return slog.New(slog.NewTextHandler(multiWriter,nil)), close, nil
 	}
 
 	close := func() error {
 		return nil
 	}
 
-	return log.New(os.Stderr, "", log.LstdFlags), close ,nil
+	return slog.New(slog.NewTextHandler(os.Stderr, nil)), close ,nil
 }
