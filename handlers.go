@@ -45,23 +45,23 @@ func (s *server) handlerShortenLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing url parameter", http.StatusBadRequest)
 		return
 	}
-	s.logger.Info(
-		fmt.Sprintf("Shortening URL:%s", longURL),
-		"method", r.Method,
-		"path", r.URL.Path,
-		"client_ip", r.RemoteAddr,
-		)
+	// s.logger.Info(
+	// 	fmt.Sprintf("Shortening URL:%s", longURL),
+	// 	"method", r.Method,
+	// 	"path", r.URL.Path,
+	// 	"client_ip", r.RemoteAddr,
+	// 	)
 	u, err := url.Parse(longURL)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		http.Error(w, "invalid URL: must include scheme (http/https) and host", http.StatusBadRequest)
 		return
 	}
-	s.logger.Info(
-		fmt.Sprintf("Parsed URL: scheme=%s, host=%s\n", u.Scheme, u.Host),
-		"method", r.Method,
-		"path", r.URL.Path,
-		"client_ip", r.RemoteAddr,
-		)
+	// s.logger.Info(
+	// 	fmt.Sprintf("Parsed URL: scheme=%s, host=%s\n", u.Scheme, u.Host),
+	// 	"method", r.Method,
+	// 	"path", r.URL.Path,
+	// 	"client_ip", r.RemoteAddr,
+	// 	)
 	if err := checkDestination(longURL); err != nil {
 		http.Error(w, fmt.Sprintf("invalid target URL: %v", err), http.StatusBadRequest)
 		return
@@ -72,11 +72,13 @@ func (s *server) handlerShortenLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.logger.Info(
-		fmt.Sprintf("Generated short code: %s for URL: %s\n", shortCode, longURL),
+		"Successfully generated short code",
 		"method", r.Method,
 		"path", r.URL.Path,
 		"client_ip", r.RemoteAddr,
-		)
+		"short_code", shortCode,
+		"url", longURL,
+	)
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
 	io.WriteString(w, shortCode)
@@ -93,7 +95,7 @@ func (s *server) handlerRedirect(w http.ResponseWriter, r *http.Request) {
 				"method", r.Method,
 				"path", r.URL.Path,
 				"client_ip", r.RemoteAddr,
-				)
+			)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
 		return
@@ -119,7 +121,7 @@ func (s *server) handlerListURLs(w http.ResponseWriter, r *http.Request) {
 			"method", r.Method,
 			"path", r.URL.Path,
 			"client_ip", r.RemoteAddr,
-			)
+		)
 		http.Error(w, "failed to list URLs", http.StatusInternalServerError)
 		return
 	}
